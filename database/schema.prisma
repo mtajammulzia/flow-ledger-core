@@ -12,20 +12,237 @@ datasource db {
   provider = "postgresql"
 }
 
+//////////////////////
+// TENANT
+//////////////////////
+
 model Tenant {
-  id          String   @id @default(cuid())
+  id        String @id @default(cuid())
+  name      String
+
+  email     String @unique
+  phone     String
+
+  logoUrl   String?
+
+  address   String?
+  city      String?
+  country   String?
+
+  settings  Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users      User[]
+  customers  Customer[]
+  suppliers  Supplier[]
+  items      Item[]
+  documents  Document[]
+}
+
+//////////////////////
+// USERS
+//////////////////////
+
+model User {
+  id        String @id @default(cuid())
+
+  email     String @unique
+  name      String
+
+  tenantId  String
+  tenant    Tenant @relation(fields: [tenantId], references: [id])
+
+  role      UserRole @default(STAFF)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+}
+
+//////////////////////
+// CUSTOMER
+//////////////////////
+
+model Customer {
+  id        String @id @default(cuid())
+
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+
+  tenantId  String
+  tenant    Tenant @relation(fields: [tenantId], references: [id])
+
+  documents Document[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+//////////////////////
+// SUPPLIER
+//////////////////////
+
+model Supplier {
+  id        String @id @default(cuid())
+
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+
+  tags      String[]
+
+  tenantId  String
+  tenant    Tenant @relation(fields: [tenantId], references: [id])
+
+  documentItems DocumentItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+//////////////////////
+// ITEM
+//////////////////////
+
+model Item {
+  id          String @id @default(cuid())
+
   name        String
-  slug        String   @unique
-  email       String?
-  phone       String?
+  description String?
 
-  // Address / business info
-  address     String?
-  city        String?
-  country     String?
+  tenantId    String
+  tenant      Tenant @relation(fields: [tenantId], references: [id])
 
-  // Metadata
-  isActive    Boolean  @default(true)
+  documentItems DocumentItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+//////////////////////
+// DOCUMENT (QUOTE / INVOICE / CHALLAN)
+//////////////////////
+
+model Document {
+  id          String @id @default(cuid())
+
+  tenantId    String
+  tenant      Tenant @relation(fields: [tenantId], references: [id])
+
+  type        DocumentType
+  number      Int
+
+  customerId  String?
+  customer    Customer? @relation(fields: [customerId], references: [id])
+
+  status      DocumentStatus @default(DRAFT)
+
+  issueDate   DateTime?
+  dueDate     DateTime?
+
+  notes       String?
+
+  subtotal    Float?
+  totalAmount Float?
+
+  // 🔥 Snapshot of tenant at time of document creation (for PDFs/legal accuracy)
+  tenantSnapshot TenantSnapshot?
+
+  items       DocumentItem[]
+
+  // 🔁 Document flow (Quotation → Invoice → etc.)
+  parentId    String?
+  parent      Document? @relation("DocumentFlow", fields: [parentId], references: [id])
+  children    Document[] @relation("DocumentFlow")
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, type, number])
+  @@index([tenantId])
+  @@index([customerId])
+}
+
+enum DocumentType {
+  QUOTATION
+  CHALLAN
+  INVOICE
+}
+
+enum DocumentStatus {
+  DRAFT
+  FINALIZED
+  CANCELLED
+}
+
+//////////////////////
+// DOCUMENT ITEMS (CORE ENGINE)
+//////////////////////
+
+model DocumentItem {
+  id          String @id @default(cuid())
+
+  documentId  String
+  document    Document @relation(fields: [documentId], references: [id])
+
+  itemId      String?
+  item        Item? @relation(fields: [itemId], references: [id])
+
+  description String
+
+  quantity    Float
+  unitPrice   Float
+  totalPrice  Float
+
+  supplierId  String?
+  supplier    Supplier? @relation(fields: [supplierId], references: [id])
+
+  // 🔥 Traceability: link to original quotation item (or previous document item)
+  sourceItemId String?
+  sourceItem   DocumentItem? @relation("ItemSource", fields: [sourceItemId], references: [id])
+  derivedItems DocumentItem[] @relation("ItemSource")
+
+  createdAt   DateTime @default(now())
+
+  @@index([documentId])
+  @@index([itemId])
+  @@index([supplierId])
+}
+
+//////////////////////
+// TENANT SNAPSHOT (FOR DOCUMENTS)
+//////////////////////
+
+model TenantSnapshot {
+  id        String @id @default(cuid())
+
+  documentId String @unique
+  document   Document @relation(fields: [documentId], references: [id])
+
+  name      String
+  logoUrl   String?
+
+  email     String
+  phone     String
+
+  address   String?
+  city      String?
+  country   String?
 }
