@@ -35,8 +35,8 @@ Default connection details (overridable via `.env`):
 
 | Variable | Default |
 |----------|---------|
-| `POSTGRES_USER` | `postgres` |
-| `POSTGRES_PASSWORD` | `postgres` |
+| `POSTGRES_USER` | `flow_ledger_core` |
+| `POSTGRES_PASSWORD` | `extremely_secure_password` |
 | `POSTGRES_DB` | `flow_ledger_core_db` |
 | `POSTGRES_PORT` | `5432` |
 
