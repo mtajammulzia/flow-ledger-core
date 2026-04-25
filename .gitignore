@@ -54,3 +54,12 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+/src/generated/prisma
+
+# Root-level compiled output (from tsc run outside nest build)
+*.tsbuildinfo
+commitlint.config.js
+commitlint.config.d.ts
+prisma.config.js
+prisma.config.d.ts

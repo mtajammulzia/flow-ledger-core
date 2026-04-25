@@ -15,12 +15,17 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "types": ["node", "jest"],
-    "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
-  }
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@generated/*": ["./src/generated/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "commitlint.config.ts", "prisma.config.ts"]
 }

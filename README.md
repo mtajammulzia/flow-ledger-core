@@ -23,7 +23,32 @@ The core REST API service for the Flow Ledger platform. Built with [NestJS](http
 pnpm install
 ```
 
-### 2. Run in development mode
+### 2. Start the database
+
+```bash
+pnpm docker:core-db:up
+```
+
+This starts a PostgreSQL 17 container (`flow-ledger-core-db`) using the settings in `docker-compose.yml`.
+
+Default connection details (overridable via `.env`):
+
+| Variable | Default |
+|----------|---------|
+| `POSTGRES_USER` | `postgres` |
+| `POSTGRES_PASSWORD` | `postgres` |
+| `POSTGRES_DB` | `flow_ledger_core_db` |
+| `POSTGRES_PORT` | `5432` |
+
+Copy `.env.example` to `.env` and adjust as needed.
+
+### 3. Apply database migrations
+
+```bash
+pnpm db:migration:apply
+```
+
+### 4. Run in development mode
 
 ```bash
 pnpm start:dev
@@ -49,6 +74,39 @@ The API will be available at `http://localhost:3000`.
 | `pnpm test:watch` | Run tests in watch mode |
 | `pnpm test:cov` | Run tests with coverage |
 | `pnpm test:e2e` | Run end-to-end tests |
+| `pnpm docker:core-db:up` | Start the Postgres container |
+| `pnpm docker:core-db:down` | Stop and remove the Postgres container + volume |
+| `pnpm db:migration:generate <name>` | Generate a new migration SQL file without applying it |
+| `pnpm db:migration:apply` | Apply all pending migrations to the database |
+| `pnpm db:schema:generate` | Regenerate the Prisma client from the schema |
+
+---
+
+## Database
+
+The database is PostgreSQL 17, running via Docker. Schema and migrations are managed with [Prisma](https://www.prisma.io).
+
+- Schema: `database/schema.prisma`
+- Migrations: `database/migrations/`
+- Prisma config: `prisma.config.ts`
+
+### Migration workflow
+
+```bash
+# 1. Generate a new migration file (does NOT apply it)
+pnpm db:migration:generate <name>
+
+# 2. Review the generated SQL in database/migrations/
+
+# 3. Apply pending migrations
+pnpm db:migration:apply
+
+# 4. Regenerate the Prisma client after schema changes
+pnpm db:schema:generate
+```
+
+> `db:migration:generate` uses `--create-only`, so it never touches the database automatically.
+> Always review the SQL before applying.
 
 ---
 

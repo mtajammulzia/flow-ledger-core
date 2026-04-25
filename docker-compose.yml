@@ -1,0 +1,16 @@
+services:
+  flow-ledger-core-db:
+    image: postgres:17-alpine
+    container_name: flow-ledger-core-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - flow_ledger_core_db:/var/lib/postgresql/data
+
+volumes:
+  flow_ledger_core_db:
