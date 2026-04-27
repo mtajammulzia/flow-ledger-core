@@ -105,14 +105,17 @@
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
       "trailingCommas": "all",
-      "semicolons": "asNeeded",
+      "semicolons": "always",
       "arrowParentheses": "always",
       "bracketSameLine": false,
       "quoteStyle": "single",
       "attributePosition": "auto",
       "bracketSpacing": true
     },
-    "globals": ["exports"]
+    "globals": ["exports"],
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    }
   },
   "html": {
     "formatter": {

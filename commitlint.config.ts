@@ -3,6 +3,6 @@ const config = {
   rules: {
     'subject-case': [2, 'always', 'lower-case'],
   },
-}
+};
 
-export default config
+export default config;

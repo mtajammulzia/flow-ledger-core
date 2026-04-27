@@ -6,6 +6,7 @@
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -19,6 +20,7 @@ datasource db {
 model Tenant {
   id        String @id @default(cuid())
   name      String
+  slug      String @unique
 
   email     String @unique
   phone     String
@@ -31,6 +33,7 @@ model Tenant {
 
   settings  Json?
 
+  isActive  Boolean @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -46,20 +49,37 @@ model Tenant {
 //////////////////////
 
 model User {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
 
-  email     String @unique
+  email     String   @unique
   name      String
 
   tenantId  String
-  tenant    Tenant @relation(fields: [tenantId], references: [id])
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
 
   role      UserRole @default(STAFF)
+  isActive  Boolean  @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  credentials UserCredentials?
+
   @@index([tenantId])
+}
+
+model UserCredentials {
+  id     String @id @default(cuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  password          String
+  lastLoginAt       DateTime?
+  passwordUpdatedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum UserRole {
