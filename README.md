@@ -31,16 +31,30 @@ pnpm docker:core-db:up
 
 This starts a PostgreSQL 17 container (`flow-ledger-core-db`) using the settings in `docker-compose.yml`.
 
+To run the full stack (app + database) via Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+The app image is built from the `Dockerfile` in the project root. Migrations are applied automatically on container start via `docker-entrypoint.sh`.
+
 Default connection details (overridable via `.env`):
 
 | Variable | Default |
 |----------|---------|
+| `API_NAME` | `flow-ledger-core` |
+| `API_PORT` | `3000` |
 | `POSTGRES_USER` | `flow_ledger_core` |
 | `POSTGRES_PASSWORD` | `extremely_secure_password` |
 | `POSTGRES_DB` | `flow_ledger_core_db` |
 | `POSTGRES_PORT` | `5432` |
+| `ACCESS_TOKEN_SECRET` | *(required — no default)* |
+| `ACCESS_TOKEN_EXPIRES_IN_DAYS` | `1` |
+| `REFRESH_TOKEN_SECRET` | *(required — no default)* |
+| `REFRESH_TOKEN_EXPIRES_IN_DAYS` | `7` |
 
-Copy `.env.example` to `.env` and adjust as needed.
+Copy `.env.example` to `.env` and fill in the required secrets before starting the server.
 
 ### 3. Apply database migrations
 
@@ -79,6 +93,8 @@ The API will be available at `http://localhost:3000`.
 | `pnpm db:migration:generate <name>` | Generate a new migration SQL file without applying it |
 | `pnpm db:migration:apply` | Apply all pending migrations to the database |
 | `pnpm db:schema:generate` | Regenerate the Prisma client from the schema |
+| `pnpm db:seed` | Seed the database with initial data |
+| `pnpm db:reset` | Full reset: drop data, re-migrate, regenerate client, and reseed |
 
 ---
 
@@ -118,8 +134,12 @@ This is a RESTful API service built on NestJS. Modules are organized under `src/
 src/
 ├── main.ts               # Application entry point
 ├── app.module.ts         # Root module
+├── config/               # Env validation (Zod)
 └── modules/
-    └── system/           # Health / system module
+    ├── auth/             # Authentication (JWT, guards, decorators)
+    ├── prisma/           # Prisma client wrapper
+    ├── system/           # Health / system module
+    └── user/             # User lookup
 ```
 
 ---
