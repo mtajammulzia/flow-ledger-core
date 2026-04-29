@@ -63,3 +63,9 @@ commitlint.config.js
 commitlint.config.d.ts
 prisma.config.js
 prisma.config.d.ts
+
+# compiled output
+dist/
+dist/
+
+**/node_modules
