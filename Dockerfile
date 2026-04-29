@@ -27,6 +27,15 @@ FROM node:24-alpine AS production
 WORKDIR /app
 
 ENV NODE_ENV=production
+# Required Chromium dependencies on Alpine for puppeteer
+RUN apk add --no-cache \
+      chromium \
+      nss \
+      freetype \
+      harfbuzz \
+      ca-certificates \
+      ttf-freefont
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Copy all dependencies (includes prisma CLI required for migrate deploy)
 COPY --from=deps /app/node_modules ./node_modules
